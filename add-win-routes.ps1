@@ -5,7 +5,7 @@ $existingRoutes = Get-NetRoute
 $wslAdapter = Get-NetAdapter -name "vEthernet (WSL)"
 
 foreach ($route in $routesToAdd) {
-  if (-not ($existingRoutes | where DestinationPrefix -eq $route)) {
+  if (-not ($existingRoutes | Where-Object DestinationPrefix -eq $route)) {
      New-NetRoute -DestinationPrefix $route -InterfaceIndex $wslAdapter.ifIndex
    }
 }
