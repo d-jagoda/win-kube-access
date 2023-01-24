@@ -2,41 +2,35 @@
 
 Set-Location $PSScriptRoot
 
-Write-Host "Setting up access Kubernetes on Docker Desktop from Windows"
+Write-Host "Setting up access to Kubernetes on Docker Desktop"
 
 Write-Host "Checking Windows routing rules"
 $routes = @("10.1.0.0/16", "10.96.0.0/12")
 $existingRoutes = Get-NetRoute
-$addRoutingRules = $false
+$runAdminScripts = $false
 
 foreach ($route in $routes) {
     if (-not ($existingRoutes | Where-Object DestinationPrefix -eq $route)) {
-        $addRoutingRules = $true
+        $runAdminScripts = $true
         break
     }
 }
 
-$adminScripts = ""
-if ($addRoutingRules) {
-    $adminScripts = ".\add-win-routes.ps1"
-}
-
-Write-Host "Checking DNS Client NRPT rule for .cluster.local"
-$nrptRule = Get-DnsClientNrptRule | Where-Object Namespace -eq ".cluster.local"
+Write-Host "Checking DNS Client NRPT rules"
+$nrptRule = Get-DnsClientNrptRule | Where-Object DisplayName -eq "Win Kube Access Rule"
 if ($null -eq $nrptRule) {
-    $adminScripts += "; .\add-win-dns.ps1"
+    $runAdminScripts = $true
 }
 
-if ($adminScripts -ne "") {
-    Write-Host "Configuring routing rules or DNS client rules (Run as Administrator)"
-    Start-Process -FilePath "powershell" -Verb RunAs -Wait -ArgumentList "-Command { cd ""$PSScriptRoot""; $adminScripts }.Invoke()"
+if ($runAdminScripts) {
+    Write-Host "Configuring routing and DNS client rules (Run as Administrator)"
+    Start-Process -FilePath "powershell" -Verb RunAs -Wait -ArgumentList "-File ""$PSScriptRoot\add-win-rules.ps1"" }"
 }
 
-
-Write-Host "Adding win-auto-start.ps1 as a startup script"
+Write-Host "Adding docker-engine-monitor.ps1 as a startup script"
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" `
     -Name "Win-Kube-Access" `
-    -Value "powershell.exe -Command { Start-Process -FilePath powershell -ArgumentList '-File ""$PSScriptRoot\docker-engine-monitor.ps1"" -NoProfile' -WindowStyle hidden }.Invoke()" `
+    -Value "powershell.exe -Command .{ Start-Process -FilePath powershell -ArgumentList '-File ""$PSScriptRoot\docker-engine-monitor.ps1"" -NoProfile' -WindowStyle hidden }" `
     -Force `
 
 $mngmtClass = [System.Management.ManagementClass]::new("Win32_Process")
