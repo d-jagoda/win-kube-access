@@ -11,8 +11,8 @@ echo "DOCKER_BOOTSTRAP_PID=$DOCKER_BOOTSTRAP_PID"
 
 if [ -z "$DOCKER_BOOTSTRAP_PID" ]
 then
-  echo "Docker is not running"
-  exit 1
+	echo "Docker is not running"
+	exit 1
 fi
 
 # Remove veth-kubeaccess (if it exists) to clean up the previous configuration

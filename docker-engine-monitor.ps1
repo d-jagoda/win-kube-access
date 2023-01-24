@@ -1,5 +1,7 @@
 
-Set-Location $PSScriptRoot 
+# This scripts configures the network in WSL docker-desktop distribution whenever Docker Desktop starts.
+
+Set-Location $PSScriptRoot
 
 while ($true) {
     $pipeName = "docker_engine_linux"
