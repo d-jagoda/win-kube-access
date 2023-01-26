@@ -30,7 +30,7 @@ if ($runAdminScripts) {
 Write-Host "Adding docker-engine-monitor.ps1 as a startup script"
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" `
     -Name "Win-Kube-Access" `
-    -Value "powershell.exe -Command .{ Start-Process -FilePath powershell -ArgumentList '-File ""$PSScriptRoot\docker-engine-monitor.ps1"" -NoProfile' -WindowStyle hidden }" `
+    -Value "powershell.exe -Command .{ Start-Process -FilePath powershell -ArgumentList '-Command .{ . $PSScriptRoot\docker-engine-monitor.ps1 *^>^&1 ^> $env:TEMP\win-kube-access-startup.log } -NoProfile' -WindowStyle hidden }" `
     -Force `
 
 $mngmtClass = [System.Management.ManagementClass]::new("Win32_Process")
